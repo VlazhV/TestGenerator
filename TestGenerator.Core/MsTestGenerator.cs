@@ -62,28 +62,25 @@ namespace TestGenerator.Core
 		public string Generate( string code, string fileName )
 		{
 			var root = CSharpSyntaxTree.ParseText( code ).GetRoot();
-			codeAnalysis.Analyze( root, true );
-			//foreach(var namespaceName in codeAnalysis.Namespaces)
-			//{
-			//	Console.WriteLine( namespaceName );
-			//}
-
-			//foreach(var methodName in codeAnalysis.FullMethodNames)
-			//{
-			//	Console.WriteLine( methodName );
-			//}
+			codeAnalysis.Analyze( root, false );
+			
 			SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
 
 			foreach ( var methodName in codeAnalysis.MethodNames )
 			{
-				methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), methodName )
+
+
+				methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), methodName + "TestMethod")
 				.WithAttributeLists( methodAttributeListSyntax )
-				.WithBody( assertBlock ) );
+				.WithBody( assertBlock )
+				.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) ) );
+				
 			}
 
 			var classDeclaration = SyntaxFactory.ClassDeclaration( fileName.Split(".").First() + "TestClass" )
 			.WithAttributeLists( classAttributeListSyntax )			
-			.WithMembers( methodDeclarations );
+			.WithMembers( methodDeclarations )
+			.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) ) ;
 
 			var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration( SyntaxFactory.ParseName( fileName.Split( "." ).First() + ".Tests" ) )
 			.WithMembers( new SyntaxList<MemberDeclarationSyntax>().Add( classDeclaration ) );

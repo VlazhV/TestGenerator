@@ -87,7 +87,8 @@ namespace TestGenerator.Core
 
 		public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
 		{
-			MethodNames.Add( string.Format( "{0}.{1}.{2}", _namespace, _class, node.Identifier.Text ) );			
+			if (node.Modifiers.First().Text.Equals( "public" ))
+				MethodNames.Add( string.Format( "{0}.{1}.{2}", _namespace, _class, node.Identifier.Text ) );			
 			base.VisitMethodDeclaration( node );
 		}
 
