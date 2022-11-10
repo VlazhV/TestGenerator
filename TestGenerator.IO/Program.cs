@@ -3,10 +3,11 @@ using TestGenerator.Console;
 
 PipelineConfig config = new PipelineConfig(5, 5, 5);
 Pipeline pipeline = new Pipeline(config);
-List<string> files = new List<string>();
 string? userInput;
 string inputDirectory;
 string outputDirectory;
+
+Console.WriteLine( "Input 'exit' for exit\n" );
 
 Console.WriteLine( "Input input-directory" );
 do
@@ -28,7 +29,7 @@ do
 
 	inputDirectory = userInput;
 
-	Console.WriteLine( "Input output-new-directory" );
+	Console.WriteLine( "Input output-directory" );
 	userInput = Console.ReadLine();
 	
 	if ( userInput.Equals( "exit" ) )
@@ -47,7 +48,7 @@ do
 		}
 		catch ( Exception e)
 		{
-			Console.WriteLine( e.Message + " Repeat" );
+			Console.WriteLine( "There is no such directory and can't create new directory. Repeat" );
 			userInput = Console.ReadLine();
 			if ( userInput.Equals( "exit" ) )
 				break;
