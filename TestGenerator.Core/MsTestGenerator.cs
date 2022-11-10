@@ -62,21 +62,23 @@ namespace TestGenerator.Core
 		public string Generate( string code, string fileName )
 		{
 			var root = CSharpSyntaxTree.ParseText( code ).GetRoot();
-			codeAnalysis.Visit( root );
-			SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
-			foreach (var namespaceName in codeAnalysis.FileStructure.Keys)
-			{				
-				foreach(var className in codeAnalysis.FileStructure[namespaceName].Keys)
-				{
-					
-					foreach( var methdodName in codeAnalysis.FileStructure[namespaceName][className])
-					{
+			codeAnalysis.Analyze( root, true );
+			//foreach(var namespaceName in codeAnalysis.Namespaces)
+			//{
+			//	Console.WriteLine( namespaceName );
+			//}
 
-						methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), string.Format( "{0}__{1}__{2}{3}", namespaceName, className, methdodName, "TestMethod" ).Replace( ".", "_" ) )
-						.WithAttributeLists( methodAttributeListSyntax )
-						.WithBody( assertBlock ) );
-					}
-				}
+			//foreach(var methodName in codeAnalysis.FullMethodNames)
+			//{
+			//	Console.WriteLine( methodName );
+			//}
+			SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
+
+			foreach ( var methodName in codeAnalysis.MethodNames )
+			{
+				methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), methodName )
+				.WithAttributeLists( methodAttributeListSyntax )
+				.WithBody( assertBlock ) );
 			}
 
 			var classDeclaration = SyntaxFactory.ClassDeclaration( fileName.Split(".").First() + "TestClass" )
@@ -88,9 +90,9 @@ namespace TestGenerator.Core
 
 			var usings = new SyntaxList<UsingDirectiveSyntax>();
 			usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " Microsoft.VisualStudio.TestTools.UnitTesting" ) ) );
-			foreach(var _namespace in codeAnalysis.FileStructure.Keys)
+			foreach(var @namespace in codeAnalysis.Namespaces)
 			{
-				usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " " + _namespace ) ) );
+				usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " " + @namespace ) ) );
 			}
 
 			var compilationUnit = SyntaxFactory.CompilationUnit()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks.Dataflow;
+using TestGenerator.Core;
 
 namespace TestGenerator.Console
 {
@@ -43,7 +44,7 @@ namespace TestGenerator.Console
 
 			var processingBlock = new TransformBlock<FileWithContent, FileWithContent>
 			(
-				fwc => new FileWithContent( ProcessFile( fwc.Content ), fwc.FilePath + ".processed" ),
+				fwc => new FileWithContent( ProcessFile( fwc.Content, fwc.FilePath ), fwc.FilePath + ".processed" ),
 				new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _config.MaxProcessingTasks }
 			);
 
@@ -82,13 +83,14 @@ namespace TestGenerator.Console
 			return result;
 		}
 
-		private string ProcessFile(string fileContent)
+		private string ProcessFile(string fileContent, string filePath)
 		{
 			int incremented = Interlocked.Increment( ref _processingCount );
 			NumberOfProcessingTasks.Add( incremented );
 
-			string result = fileContent.ToUpper();
-			Thread.Sleep( 1000 );
+			string fileName = filePath.Split( "\\" ).Last();
+			MsTestGenerator testGenerator = new ();
+			string result = testGenerator.Generate(fileContent, fileName);
 
 			Interlocked.Decrement( ref _processingCount );
 			return result;

@@ -27,6 +27,25 @@ namespace TestGenerator.Core
 			base.VisitNamespaceDeclaration( node );
 		}
 
+		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+		{
+			_namespace = node.Name.ToString();
+			base.VisitNamespaceDeclaration( node );
+		}
+
+		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+		{
+			_namespace = node.Name.ToString();
+			base.VisitNamespaceDeclaration( node );
+		}
+
+		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+		{
+			_namespace = node.Name.ToString();
+			base.VisitNamespaceDeclaration( node );
+		}
+
+
 		public override void VisitClassDeclaration( ClassDeclarationSyntax node )
 		{
 			base.VisitClassDeclaration( node );
@@ -37,6 +56,20 @@ namespace TestGenerator.Core
 			base.VisitMethodDeclaration( node );
 		}
 	}
+
+	public class x
+	{
+		public void foo(int x)
+		{
+			return;
+		}
+		public void bar ()
+		{
+			return;
+		}
+
+	}
+
 }
 ";
 
