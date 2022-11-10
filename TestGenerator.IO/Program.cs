@@ -1,77 +1,70 @@
 ﻿using TestGenerator.Core;
+using TestGenerator.Console;
 
-var code = @"
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+PipelineConfig config = new PipelineConfig(5, 5, 5);
+Pipeline pipeline = new Pipeline(config);
+List<string> files = new List<string>();
+string? userInput;
+string inputDirectory;
+string outputDirectory;
 
-namespace TestGenerator.Core
+Console.WriteLine( "Input input-directory" );
+do
 {
-	public class CodeAnalysis : CSharpSyntaxWalker
+
+	userInput = Console.ReadLine();
+	if ( userInput.Equals( "exit" ) )
+		break;
+	while ( !Directory.Exists( userInput ) )
 	{
-		string _namespace = "";
+		Console.WriteLine( "There is no such directory. Repeat." );
+		userInput = Console.ReadLine();
+		if ( userInput.Equals( "exit" ) )
+			break;
+	}
 
+	if ( userInput.Equals( "exit" ) )
+		break;
 
-		public CodeAnalysis () : base(SyntaxWalkerDepth.Token)
-		{
+	inputDirectory = userInput;
+
+	Console.WriteLine( "Input output-new-directory" );
+	userInput = Console.ReadLine();
+	
+	if ( userInput.Equals( "exit" ) )
+		break;
+
+	
+	while(true)
+	{
+		if ( Directory.Exists( userInput ) )
+			break;
+				
+		try
+		{				
+			Directory.CreateDirectory( userInput );
+			break;
 		}
-
-		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+		catch ( Exception e)
 		{
-			_namespace = node.Name.ToString();
-			base.VisitNamespaceDeclaration( node );
-		}
-
-		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
-		{
-			_namespace = node.Name.ToString();
-			base.VisitNamespaceDeclaration( node );
-		}
-
-		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
-		{
-			_namespace = node.Name.ToString();
-			base.VisitNamespaceDeclaration( node );
-		}
-
-		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
-		{
-			_namespace = node.Name.ToString();
-			base.VisitNamespaceDeclaration( node );
-		}
-
-
-		public override void VisitClassDeclaration( ClassDeclarationSyntax node )
-		{
-			base.VisitClassDeclaration( node );
-		}
-
-		public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
-		{			
-			base.VisitMethodDeclaration( node );
+			Console.WriteLine( e.Message + " Repeat" );
+			userInput = Console.ReadLine();
+			if ( userInput.Equals( "exit" ) )
+				break;
 		}
 	}
 
-	public class x
-	{
-		public void foo(int x)
-		{
-			return;
-		}
-		public void bar ()
-		{
-			return;
-		}
+	if ( userInput.Equals( "exit" ) )
+		break;
 
-	}
+	outputDirectory = userInput;
 
-}
-";
+	Console.WriteLine( "Processing..." );
 
-MsTestGenerator msTestGen = new MsTestGenerator();
-Console.WriteLine(msTestGen.Generate( code, "CodeAnalysis.cs" ));
+	await pipeline.PerformProcessing( Directory.GetFiles( inputDirectory, "*.cs" ), outputDirectory );
+	Console.WriteLine( "Ready" );
+	Console.WriteLine( "\n\n\n\n\n\n\n\n" );
+	Console.WriteLine( "Input input-directory" );
+
+} while ( !userInput.Equals( "exit" ) );
+

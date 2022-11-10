@@ -24,7 +24,7 @@ namespace TestGenerator.Console
 			NumberOfWritingTasks = new ConcurrentBag<int>();
 		}
 
-		public async Task PerformProcessing( IEnumerable<string> files)
+		public async Task PerformProcessing( IEnumerable<string> files, string outputDirectoryPath)
 		{
 			_readingCount = 0;
 			_processingCount = 0;
@@ -44,7 +44,7 @@ namespace TestGenerator.Console
 
 			var processingBlock = new TransformBlock<FileWithContent, FileWithContent>
 			(
-				fwc => new FileWithContent( ProcessFile( fwc.Content, fwc.FilePath ), fwc.FilePath + ".processed" ),
+				fwc => new FileWithContent( ProcessFile( fwc.Content, fwc.FilePath ), outputDirectoryPath + @"\" + fwc.FilePath.Split(@"\").Last().Split(".").First() + "Test.cs"),
 				new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _config.MaxProcessingTasks }
 			);
 
