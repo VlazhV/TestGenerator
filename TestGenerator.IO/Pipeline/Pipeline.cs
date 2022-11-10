@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks.Dataflow;
 
-namespace TestGenerator.Core
+namespace TestGenerator.Console
 {
 	public class Pipeline
 	{
@@ -23,7 +23,7 @@ namespace TestGenerator.Core
 			NumberOfWritingTasks = new ConcurrentBag<int>();
 		}
 
-		public async Task PerformProcessing( IEnumerable<string> files, string v )
+		public async Task PerformProcessing( IEnumerable<string> files)
 		{
 			_readingCount = 0;
 			_processingCount = 0;

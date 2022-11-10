@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestGenerator.Core
+namespace TestGenerator.Console
 {
-	public class Config
+	public class PipelineConfig
 	{
 		public int MaxReadingTasks{ get; set; }
 		public int MaxProcessingTasks{ get; set; }
 		public int MaxWritingTasks{ get; set; }
 
-		public Config(int maxReadingTasks, int maxProcessingTasks, int maxWritingTasks)
+		public PipelineConfig(int maxReadingTasks, int maxProcessingTasks, int maxWritingTasks)
 		{
 			MaxReadingTasks = maxReadingTasks;
 			MaxProcessingTasks = maxProcessingTasks;			

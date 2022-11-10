@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestGenerator.Core
+namespace TestGenerator.Console
 {
 	public class FileWithContent
 	{
