@@ -1,11 +1,13 @@
 ﻿using TestGenerator.Core;
 using TestGenerator.Console;
 
-PipelineConfig config = new PipelineConfig(5, 5, 5);
-Pipeline pipeline = new Pipeline(config);
+
 string? userInput;
 string inputDirectory;
 string outputDirectory;
+int maxRead;
+int maxWrite;
+int maxProcess;
 
 Console.WriteLine( "Input 'exit' for exit\n" );
 
@@ -60,8 +62,60 @@ do
 
 	outputDirectory = userInput;
 
+
+	Console.WriteLine( "Input max reading tasks" );
+	userInput = Console.ReadLine();
+	if ( userInput.Equals( "exit" ) )
+		break;
+	while (!int.TryParse(userInput, out maxRead) )
+	{
+		Console.WriteLine( "Incorrect format. Repeat");
+		Console.WriteLine( "Input max reading tasks" );
+		userInput = Console.ReadLine();
+		if ( userInput.Equals( "exit" ) )
+			break;
+	}
+	if ( userInput.Equals( "exit" ) )
+		break;
+
+	Console.WriteLine( "Input max processing tasks" );
+	userInput = Console.ReadLine();
+	if ( userInput.Equals( "exit" ) )
+		break;
+	while ( !int.TryParse( userInput, out maxProcess ) )
+	{
+		Console.WriteLine( "Incorrect format. Repeat" );
+		Console.WriteLine( "Input max processing tasks" );
+		userInput = Console.ReadLine();
+		if ( userInput.Equals( "exit" ) )
+			break;
+	}
+	if ( userInput.Equals( "exit" ) )
+		break;
+
+
+	Console.WriteLine( "Input max writing tasks" );
+	userInput = Console.ReadLine();
+	if ( userInput.Equals( "exit" ) )
+		break;
+	while ( !int.TryParse( userInput, out maxWrite ) )
+	{
+		Console.WriteLine( "Incorrect format. Repeat" );
+		Console.WriteLine( "Input max writing tasks" );
+		userInput = Console.ReadLine();
+		if ( userInput.Equals( "exit" ) )
+			break;
+	}
+	if ( userInput.Equals( "exit" ) )
+		break;
+
+
+
 	Console.WriteLine( "Do you want to use always full method names[y]" );
 	userInput = Console.ReadLine();
+
+	PipelineConfig config = new PipelineConfig( maxRead, maxProcess, maxWrite );
+	Pipeline pipeline = new Pipeline( config );
 	bool needToRefactor = !userInput.Equals( "y" );
 	Console.WriteLine( "Processing..." );
 
