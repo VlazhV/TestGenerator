@@ -24,7 +24,7 @@ namespace TestGenerator.Console
 			NumberOfWritingTasks = new ConcurrentBag<int>();
 		}
 
-		public async Task PerformProcessing( IEnumerable<string> files, string outputDirectoryPath, bool needToRefactor = true)
+		public async Task PerformProcessing( IEnumerable<string> files, string outputDirectoryPath)
 		{
 			_readingCount = 0;
 			_processingCount = 0;
@@ -42,9 +42,17 @@ namespace TestGenerator.Console
 				new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _config.MaxReadingTasks }
 			);
 
-			var processingBlock = new TransformBlock<FileWithContent, FileWithContent>
+			var processingBlock = new TransformManyBlock<FileWithContent, FileWithContent>
 			(
-				fwc => new FileWithContent( ProcessFile( fwc.Content, fwc.FilePath, needToRefactor ), outputDirectoryPath + @"\" + fwc.FilePath.Split(@"\").Last().Split(".").First() + "Test.cs"),
+				fwc => {
+					var results = ProcessFile( fwc.Content, fwc.FilePath );
+					var filesWithContent = new List<FileWithContent>();
+					foreach( var fileName in results.Keys )
+					{
+						filesWithContent.Add( new FileWithContent( results[ fileName ], outputDirectoryPath + "\\" + fileName ) );
+					}
+					return filesWithContent;
+				},
 				new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _config.MaxProcessingTasks }
 			);
 
@@ -83,14 +91,14 @@ namespace TestGenerator.Console
 			return result;
 		}
 
-		private string ProcessFile(string fileContent, string filePath, bool needToRefactor = true )
+		private Dictionary<string, string> ProcessFile(string fileContent, string filePath )
 		{
 			int incremented = Interlocked.Increment( ref _processingCount );
 			NumberOfProcessingTasks.Add( incremented );
 
 			string fileName = filePath.Split( "\\" ).Last();
 			MsTestGenerator testGenerator = new ();
-			string result = testGenerator.Generate(fileContent, fileName, needToRefactor);
+			var result = testGenerator.Generate(fileContent);
 
 			Interlocked.Decrement( ref _processingCount );
 			return result;

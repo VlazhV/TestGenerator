@@ -110,16 +110,12 @@ do
 		break;
 
 
-
-	Console.WriteLine( "Do you want to use always full method names[y]" );
-	userInput = Console.ReadLine();
-
 	PipelineConfig config = new PipelineConfig( maxRead, maxProcess, maxWrite );
 	Pipeline pipeline = new Pipeline( config );
-	bool needToRefactor = !userInput.Equals( "y" );
+
 	Console.WriteLine( "Processing..." );
 
-	await pipeline.PerformProcessing( Directory.GetFiles( inputDirectory, "*.cs" ), outputDirectory, needToRefactor );
+	await pipeline.PerformProcessing( Directory.GetFiles( inputDirectory, "*.cs" ), outputDirectory );
 	Console.WriteLine( "Ready" );
 	Console.WriteLine( "\n\n\n\n\n\n\n\n" );
 	Console.WriteLine( "Input input-directory" );

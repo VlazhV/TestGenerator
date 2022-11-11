@@ -15,6 +15,8 @@ namespace TestGenerator.Core
 
 		public List<string> Namespaces { get; } = new();
 		public List<string> MethodNames { get; } = new();
+		//				namespace			 class		  method
+		public Dictionary<string, Dictionary<string, List<string>>> FileStructure { get; }
 							
 
 		private string _namespace = "";
@@ -23,97 +25,74 @@ namespace TestGenerator.Core
 
 
 		public CodeAnalysis () : base(SyntaxWalkerDepth.Token)
-		{}
+		{
+			FileStructure = new();
+		}
 
 		
 
-		public void Analyze (SyntaxNode? node, bool needToRefactor)
+		public void Analyze (SyntaxNode? node)
 		{		
 			base.Visit( node );
-			for ( int i = 0; i < MethodNames.Count - 1; i++ )
-			{
-				int num = 2;
-				bool isRepeated = false;
-				for ( int j = i + 1; j < MethodNames.Count; ++j )
-				{
-
-					if ( MethodNames[ i ].Equals( MethodNames[ j ] ) )
-					{
-
-						MethodNames[ j ] = MethodNames[ j ] + num.ToString();
-						isRepeated = true;
-						++num;
-					}
-				}
-				if ( isRepeated )
-					MethodNames[ i ] = MethodNames[ i ] + "1";				
-			}
-
-			for ( int i = 0; i < MethodNames.Count; ++i )
-				MethodNames[ i ] = MethodNames[ i ].Replace( ".", "_" );
-
-			if ( needToRefactor ) RefactorNames();
-
+			NumerateOverloadedMethods();
 		}
 
 		public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
 		{
-			var newNamespace = node.Name.ToString();
-			if ( !newNamespace.Equals( _namespace ) ) 
-			{
-				Namespaces.Add( newNamespace );
-				_namespace = newNamespace;
-			}
-			
+			_namespace = node.Name.ToString();
+			FileStructure.Add( _namespace, new Dictionary<string, List<string>>() );			
 			base.VisitNamespaceDeclaration( node );
 		}
 
 		public override void VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
 		{
-			_namespace = node.Name.ToString();		
+			_namespace = node.Name.ToString();
+			FileStructure.Add( _namespace, new Dictionary<string, List<string>>() );
 			base.VisitFileScopedNamespaceDeclaration( node );
 		}
 
 		public override void VisitClassDeclaration( ClassDeclarationSyntax node )
 		{
-			var newClass = node.Identifier.Text;
-			if ( !newClass.Equals( _class ) )
-			{
-				_class = newClass;
-				++_classCount;
-			}
+			_class = node.Identifier.Text;
+			FileStructure[ _namespace ].Add( _class, new() );
 			base.VisitClassDeclaration( node );
 		}
 
 		public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
 		{
-			if (node.Modifiers.First().Text.Equals( "public" ))
-				MethodNames.Add( string.Format( "{0}.{1}.{2}", _namespace, _class, node.Identifier.Text ) );			
+			if (node.Modifiers.First().Text.Equals("public"))
+				FileStructure[ _namespace ][ _class ].Add( node.Identifier.Text );
 			base.VisitMethodDeclaration( node );
 		}
 
-
-		private void RefactorNames()
+		private void NumerateOverloadedMethods()
 		{
-			if (_classCount == 1)
+			foreach(var @namespace in FileStructure.Keys)
 			{
-				for (int i = 0; i < MethodNames.Count; ++i )
+				foreach(var @class in FileStructure[@namespace].Keys)
 				{
-					MethodNames[ i ] = MethodNames[ i ].Split( "_" ).Last();
-				}
-				return;
-			}
+					var methodList = FileStructure[@namespace][@class];
+					for (int i = 0; i < methodList.Count - 1; i++)
+					{						
+						int num = 2;
+						bool isRepeated = false;
+						for ( int j = i + 1; j < methodList.Count; ++j )
+						{
 
-			if (Namespaces.Count == 1)
-			{
-				for ( int i = 0; i < MethodNames.Count; ++i )
-				{
-					var names = MethodNames[ i ].Split( "_" );
-					MethodNames[ i ] = names[ ^2 ] + "_" + names.Last();
+							if ( methodList[ i ].Equals( methodList[ j ] ) )
+							{
+
+								methodList[ j ] = methodList[ j ] + num.ToString();
+								isRepeated = true;
+								++num;
+							}
+						}
+						if ( isRepeated )
+							methodList[ i ] = methodList[ i ] + "1";
+
+					}
 				}
 			}
-
-			
 		}
 	}
 }

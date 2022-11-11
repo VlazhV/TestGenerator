@@ -58,47 +58,52 @@ namespace TestGenerator.Core
 														SyntaxFactory.Attribute( SyntaxFactory.ParseName( "TestClass" ) ) ) ) );
 
 
-
-		public string Generate( string code, string fileName, bool needToRefactor )
+		//				FileName  Code
+		public Dictionary<string, string> Generate( string code )
 		{
 			var root = CSharpSyntaxTree.ParseText( code ).GetRoot();
-			codeAnalysis.Analyze( root, needToRefactor );
-			
-			SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
+			codeAnalysis.Analyze( root );
 
-			foreach ( var methodName in codeAnalysis.MethodNames )
+			Dictionary<string, string> fileCodePairs = new();
+
+			foreach (var namespaceName in codeAnalysis.FileStructure.Keys)
 			{
+				ClassDeclarationSyntax? classDeclaration = null;
+				foreach (var className in codeAnalysis.FileStructure[ namespaceName].Keys)
+				{
+					SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
+					foreach ( var methodName in codeAnalysis.FileStructure[ namespaceName ][ className ] ) 
+					{
+						methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), methodName + "Test" )
+						.WithAttributeLists( methodAttributeListSyntax )
+						.WithBody( assertBlock )
+						.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) ) );
+					}
+					classDeclaration = SyntaxFactory.ClassDeclaration( className + "Test" )
+					.WithAttributeLists( classAttributeListSyntax )
+					.WithMembers( methodDeclarations )
+					.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) );
 
 
-				methodDeclarations = methodDeclarations.Add( SyntaxFactory.MethodDeclaration( SyntaxFactory.ParseTypeName( "void" ), methodName + "TestMethod")
-				.WithAttributeLists( methodAttributeListSyntax )
-				.WithBody( assertBlock )
-				.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) ) );
-				
+					var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration( SyntaxFactory.ParseName( namespaceName + ".Tests" ) );
+					if ( classDeclaration != null )
+						namespaceDeclaration = namespaceDeclaration.WithMembers( new SyntaxList<MemberDeclarationSyntax>().Add( classDeclaration ) );
+
+					var usings = new SyntaxList<UsingDirectiveSyntax>();
+					usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " Microsoft.VisualStudio.TestTools.UnitTesting" ) ) )
+					.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " " + namespaceName ) ) );
+					
+
+					var compilationUnit = SyntaxFactory.CompilationUnit()
+					.WithUsings( usings )
+					.WithMembers( new SyntaxList<MemberDeclarationSyntax>().Add( namespaceDeclaration ) )
+					.NormalizeWhitespace();
+
+					fileCodePairs.Add( className + "Test.cs", compilationUnit.ToFullString() );
+				}
+
 			}
-
-			var classDeclaration = SyntaxFactory.ClassDeclaration( fileName.Split(".").First() + "TestClass" )
-			.WithAttributeLists( classAttributeListSyntax )			
-			.WithMembers( methodDeclarations )
-			.WithModifiers( new SyntaxTokenList().Add( SyntaxFactory.ParseToken( "public" ) ) ) ;
-
-			var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration( SyntaxFactory.ParseName( fileName.Split( "." ).First() + ".Tests" ) )
-			.WithMembers( new SyntaxList<MemberDeclarationSyntax>().Add( classDeclaration ) );
-
-			var usings = new SyntaxList<UsingDirectiveSyntax>();
-			usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " Microsoft.VisualStudio.TestTools.UnitTesting" ) ) );
-			foreach(var @namespace in codeAnalysis.Namespaces)
-			{
-				usings = usings.Add( SyntaxFactory.UsingDirective( SyntaxFactory.ParseName( " " + @namespace ) ) );
-			}
-
-			var compilationUnit = SyntaxFactory.CompilationUnit()
-				.WithUsings( usings )
-				.WithMembers( new SyntaxList<MemberDeclarationSyntax>().Add( namespaceDeclaration ) )
-				.NormalizeWhitespace();
-
-			return compilationUnit.ToFullString();
-
+			return fileCodePairs;
 		}
 		
 	}
