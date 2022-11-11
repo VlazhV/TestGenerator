@@ -60,9 +60,12 @@ do
 
 	outputDirectory = userInput;
 
+	Console.WriteLine( "Do you want to use always full method names[y]" );
+	userInput = Console.ReadLine();
+	bool needToRefactor = !userInput.Equals( "y" );
 	Console.WriteLine( "Processing..." );
 
-	await pipeline.PerformProcessing( Directory.GetFiles( inputDirectory, "*.cs" ), outputDirectory );
+	await pipeline.PerformProcessing( Directory.GetFiles( inputDirectory, "*.cs" ), outputDirectory, needToRefactor );
 	Console.WriteLine( "Ready" );
 	Console.WriteLine( "\n\n\n\n\n\n\n\n" );
 	Console.WriteLine( "Input input-directory" );

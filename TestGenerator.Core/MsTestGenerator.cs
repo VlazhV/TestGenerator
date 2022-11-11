@@ -59,10 +59,10 @@ namespace TestGenerator.Core
 
 
 
-		public string Generate( string code, string fileName )
+		public string Generate( string code, string fileName, bool needToRefactor )
 		{
 			var root = CSharpSyntaxTree.ParseText( code ).GetRoot();
-			codeAnalysis.Analyze( root, false );
+			codeAnalysis.Analyze( root, needToRefactor );
 			
 			SyntaxList<MemberDeclarationSyntax> methodDeclarations = new();
 
