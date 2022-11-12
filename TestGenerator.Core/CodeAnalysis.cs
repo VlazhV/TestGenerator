@@ -11,12 +11,9 @@ namespace TestGenerator.Core
 {
 	public class CodeAnalysis : CSharpSyntaxWalker
 	{
-		
 
-		public List<string> Namespaces { get; } = new();
-		public List<string> MethodNames { get; } = new();
 		//				namespace			 class		  method
-		public Dictionary<string, Dictionary<string, List<string>>> FileStructure { get; }
+		public Dictionary<string, Dictionary<string, List<string>>> FileStructure { get; } = new();
 							
 
 		private string _namespace = "";
@@ -26,7 +23,6 @@ namespace TestGenerator.Core
 
 		public CodeAnalysis () : base(SyntaxWalkerDepth.Token)
 		{
-			FileStructure = new();
 		}
 
 		
